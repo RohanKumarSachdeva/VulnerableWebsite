@@ -4,15 +4,15 @@ import mysql.connector
 import re
 
 app = Flask(__name__)
-app.secret_key = os.getenv("vulnerable_website_api_key")
+app.secret_key = 's3cr3t'
 
 
 connection = mysql.connector.connect(
-    host='localhost',
+    host='db',
     user='root',
-    password=os.getenv("db_root_password"),
+    password='root',
     port='3306',
-    database=os.getenv("db_name")
+    database='VulnerableWebsite'
 )
 
 
