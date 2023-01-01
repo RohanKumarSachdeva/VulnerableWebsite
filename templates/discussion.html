@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+
+{% block title %}Discussions{% endblock %}
+
+{% block content %}
+<h2>Discussions Page</h2>
+<div>
+    <form action="{{ url_for('discussion') }}" method="post">
+        <textarea rows="4" cols="50" name="discussion"
+                  style="overflow:auto;resize:none"
+                  maxlength="300">Enter text here...</textarea>
+        <br>
+        <input type="submit" value="Discuss">
+        <div class="msg">{{ msg }}</div>
+    </form>
+</div>
+{% for row in data %}
+    <div>
+        <p>{{ row[2] }} commented:</p>
+        <p>{{ row[3]|safe }}</p>
+    </div>
+{% endfor %}
+
+{% endblock %}
