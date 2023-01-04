@@ -118,4 +118,7 @@ The disclosure, capture, prediction, brute force, or fixation of the session ID 
   - Similar technique can be used to fixate session of any valid user present in the database.
   
 #### Remediation Steps:
-* Make sure to use strong API key using CPRG.
+- Using strong and random API secret_key to avoid bruteforce attacks ([Reference](https://flask.palletsprojects.com/en/0.12.x/quickstart/#sessions)).
+- Session ID must be long enough to prevent brute force attacks. The session ID length must be at least 128 bits (16 bytes).
+- The session ID must be unpredictable (random enough) to prevent guessing attacks. For this purpose, a good CSPRNG (Cryptographically Secure Pseudorandom Number Generator) should be used to create session IDs.
+- Also, an active session should be warned when it is accessed from another location.
