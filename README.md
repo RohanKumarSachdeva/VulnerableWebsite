@@ -1,19 +1,17 @@
 # VulnerableWebsite
-* This a `Student Management` website build on Flask and MySQL database for demonstrating OWASP vulnerabilities.
+* This a `Student Management` website built on Flask and MySQL database for demonstrating OWASP vulnerabilities.
 * The website features user registration and login, profile viewing and discussion posting functionalities.
-* User with username `admin` when created can view profiles for all registered users on its `Profile` page. All other users can only view thier own profile details.
+* User with username `admin` can view profiles for all registered users on its `Profile` page. All other users can only view thier own profile details.
 * Every user can post comments and view comments posted by all other users on `Discussions` page.
 
 ## How to run
-* Prerequisite: Install Docker Desktop.
+* Prerequisite: Install Docker.
 * Clone this repository `https://github.com/RohanKumarSachdeva/VulnerableWebsite`.
 * Change the directory to `VulnerableWebsite`
 * Run `docker-compose up`
 * Browse to `http://127.0.0.1:5000/` to access the application.
 
-#### Note: Register a user with username `admin` to unlock admin profile viewing feature.
-
-## OWASP vulnerabilities Detail and their Remediations
+## OWASP vulnerabilities Detail and their Remediation
 ### 1. SQL Injection:
 #### Attack Details:
 This vulnerability allows an attacker to interfere with the queries that an application makes to its database by
@@ -26,10 +24,10 @@ Which transforms to:
 
 If the query returns the details of a user, then the login is successful. Otherwise, it is rejected.
 
-Here, an attacker can log in as any user without a password simply by using the SQL comment sequence `-- ` which will comment out the password check from the `WHERE` clause of the query. For example, submitting the username **`admin'-- `** and a blank/wrong password results in the following query:
+Here, an attacker can log in as any user without a password simply by using the SQL comment sequence `-- ` which will comment out the password check from the `WHERE` clause of the query. For example, submitting the username **`admin'-- `** (make sure to add a ` ` space character after `--`) ,and a blank/wrong password results in the following query:
 > SELECT * FROM users WHERE username = 'admin'-- ' AND password = ''
 
-This query returns the user details **in-band**, if its username `admin` exists in the database and successfully logs the attacker in as that user. Since `admin` in our application has capability to view details of all registered users, the attacker will now be able to view this information.
+This query returns the user details **in-band**, if its username `admin` exists in the database and successfully logs the attacker in as that user. Since `admin` user has capability to view details of all registered users, the attacker will now be able to view this information.
 
 #### Remediation Steps: Following are the best practices to avoid SQL Injection
 * **Using Prepared/Parameterized statements**. These are pre-compiled SQL statements. The query is already pre-compiled, so the final query will not go through the compilation phase again. For this reason, the user-provided data will always be interpreted as a simple string and cannot modify the original query’s logic. Hence to fix the vulnerability in our application we can use the following parameterized statement where `%s` are placeholders used for parameters that will be supplied during execution time.
@@ -42,10 +40,10 @@ This query returns the user details **in-band**, if its username `admin` exists 
 
 ### 2. Stored Cross Site Scripting (XSS): can cause RCE
 #### Attack Details:
-Stored XSS arises when an application receives data from an untrusted source and includes that data within its later HTTP responses in an unsafe way. The data in question might be submitted to the application via HTTP requests; for example in our vulnerable application users can use the **Discussion Section** to post comments which get saved to the database. All comments are visible to every registered user, hence if an attacker has injected Javascript via comment it gets saved to the database, and whenever any user loads this discussion section server will return this script. An attacker can craft the Javascript to perform **RCE** that may steal cookies, saved passwords, or CSRF tokens and relay them back to the attacker-controlled domain.
+Stored XSS arises when an application receives data from an untrusted source and includes that data within its later HTTP responses in an unsafe way. The data in question might be submitted to the application via HTTP requests; for example in our vulnerable application users can use the **Discussion Section** to post comments which get saved to the database. All comments are visible to every registered user, hence if an attacker has injected Javascript (example `<script>alert('Hacked')</script>`) via comment it gets saved to the database, and whenever any user loads this discussion section server will return this script. An attacker can craft the Javascript to perform **RCE** that may steal cookies, saved passwords, or CSRF tokens and relay them back to the attacker-controlled domain.
 
 Deep diving into our application code we see the 2 main causes of this vulnerability.
-* **No validation/sanitization** of user data before inserting it into database.
+* **No validation/sanitization** of user data before inserting it into the database.
 ```
   # get user comment and insert into discussion table
   comment = request.form['discussion']
@@ -71,7 +69,7 @@ Deep diving into our application code we see the 2 main causes of this vulnerabi
   - Construct **Regular expressions** to validate user input.
 
 * **Output Encoding for “HTML Contexts”.**  Output Encoding is recommended when we need to safely display data exactly as a user typed it in.
-Hence in order to add a variable to a HTML context safely, HTML entity encoding should be used for that variable as we add it to a web template. Flask has default encoding capability ([Reference Link](https://flask.palletsprojects.com/en/1.1.x/templating/#controlling-autoescaping)), hence to fix the vulnerability in our code we should remove the `|safe` tag so that Flask can encode the string value before adding it to HTML.
+Hence, in order to add a variable to an HTML context safely, HTML entity encoding should be used for that variable as we add it to a web template. Flask has [default encoding](https://flask.palletsprojects.com/en/1.1.x/templating/#controlling-autoescaping) capability, hence to fix the vulnerability in our code we should remove the `|safe` tag so that Flask can encode the string value before adding it to HTML.
 
 ### 3. Session Hijacking:
 #### Attack Details:
@@ -89,7 +87,7 @@ The disclosure, capture, prediction, brute force, or fixation of the session ID 
   ```
 
 * **Step 2:**
-  - Use wordlist ([Download Link](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjstLrx8af8AhX8-DgGHQJyA0UQFnoECBMQAQ&url=https%3A%2F%2Fgithub.com%2Fbrannondorsey%2Fnaive-hashcat%2Freleases%2Fdownload%2Fdata%2Frockyou.txt&usg=AOvVaw3snAERl1mU6Ccr4WFEazBd)) of common passwords to bruteforce the secret key.
+  - Use [wordlist](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&ved=2ahUKEwjstLrx8af8AhX8-DgGHQJyA0UQFnoECBMQAQ&url=https%3A%2F%2Fgithub.com%2Fbrannondorsey%2Fnaive-hashcat%2Freleases%2Fdownload%2Fdata%2Frockyou.txt&usg=AOvVaw3snAERl1mU6Ccr4WFEazBd) of common passwords to bruteforce the secret key.
    ```
    flask-unsign --wordlist rockyou.txt --unsign --cookie 'eyJpZCI6MSwibG9nZ2VkaW4iOnRydWUsInVzZXJuYW1lIjoidGVzdCJ9.Y6-xzg.NeUwSfTaH1n2gWd5qhqSsNv-7Tk'  --no-literal-eval
    ```
@@ -118,7 +116,7 @@ The disclosure, capture, prediction, brute force, or fixation of the session ID 
   - Similar technique can be used to fixate session of any valid user present in the database.
   
 #### Remediation Steps:
-- Using strong and random API secret_key to avoid bruteforce attacks ([Reference](https://flask.palletsprojects.com/en/0.12.x/quickstart/#sessions)).
+- Using [strong and random](https://flask.palletsprojects.com/en/0.12.x/quickstart/#sessions) API secret_key to avoid bruteforce attacks.
 - Session ID must be long enough to prevent brute force attacks. The session ID length must be at least 128 bits (16 bytes).
 - The session ID must be unpredictable (random enough) to prevent guessing attacks. For this purpose, a good CSPRNG (Cryptographically Secure Pseudorandom Number Generator) should be used to create session IDs.
 - Also, an active session should be warned when it is accessed from another location.
