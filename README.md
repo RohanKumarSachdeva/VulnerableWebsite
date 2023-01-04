@@ -1,6 +1,7 @@
 # VulnerableWebsite
 * This is a `Student Management` website built on Flask and MySQL database for demonstrating OWASP vulnerabilities.
 * The website features user registration and login, profile viewing and discussion posting functionalities.
+* Username `admin` with password `admin123` gets initialized when application is deployed.
 * `admin` user can view profiles for all registered users on its `Profile` page. All other users can only view their own profile details.
 * Every user can post comments and view comments posted by all other users on `Discussions` page.
 
