@@ -73,7 +73,7 @@ Hence, in order to add a variable to an HTML context safely, HTML entity encodin
 
 ### 3. Session Hijacking:
 #### Attack Details:
-The disclosure, capture, prediction, brute force, or fixation of the session ID will lead to session hijacking (or sidejacking) attacks, where an attacker is able to fully impersonate a victim user in the web application. Our application is vulnerable to **session hijacking and session fixation** which can be explioted by using tools like **flask-unsign**. Flask-unsign ([Download Link](https://pypi.org/project/flask-unsign/)) is a command line tool to fetch, decode, brute-force and craft session cookies of a Flask application by guessing secret keys. Below are the steps on how to exploit the session vulnerability in our flask application:
+The disclosure, capture, prediction, brute force, or fixation of the session ID will lead to session hijacking (or sidejacking) attacks, where an attacker is able to fully impersonate a victim user in the web application. Our application is vulnerable to **session hijacking and session fixation** which can be explioted by using tools like **flask-unsign**. [Flask-unsign](https://pypi.org/project/flask-unsign/) is a command line tool to fetch, decode, brute-force and craft session cookies of a Flask application by guessing secret keys. Below are the steps on how to exploit the session vulnerability in our flask application:
 
 * **Step 1:**
   - Login to the website and use inspect element to retrieve the server supplied cookie value.

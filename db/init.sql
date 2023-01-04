@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
-INSERT INTO `accounts` (`id`, `username`, `password`, `email`) VALUES (1, 'test', 'test', 'test@test.com');
+INSERT INTO `accounts` (`id`, `username`, `password`, `email`) VALUES (1, 'admin', 'admin123', 'admin@gmail.com');
 
 CREATE TABLE IF NOT EXISTS `discussions` (
 	`id` int(11) NOT NULL AUTO_INCREMENT,
